@@ -2,7 +2,23 @@ package com.dynatrace.ace
 
 import groovy.json.JsonOutput
 
-def pushDynatraceAnnotationEvent( Map args ) {
+boolean pushDynatraceEvent( Map args ) {
+  switch(args.eventType) {
+  case "CUSTOM_ANNOTATION":
+    pushDynatraceAnnotationEvent(args)
+  case "CUSTOM_CONFIGURATION":
+    pushDynatraceConfigurationEvent(args)
+  case "CUSTOM_DEPLOYMENT":
+    pushDynatraceDeploymentEvent(args)
+  case "CUSTOM_INFO":
+    pushDynatraceInfoEvent(args)
+  default:
+    echo "Invalid eventType: " + args.eventType
+    return false
+  }
+}
+
+private boolean pushDynatraceAnnotationEvent( Map args ) {
 
   // check input arguments
   String dtTenantUrl = args.containsKey("dtTenantUrl") ? args.dtTenantUrl : "${DT_TENANT_URL}"
@@ -19,19 +35,19 @@ def pushDynatraceAnnotationEvent( Map args ) {
   // check minimum required params
   if(tagRule == "" ) {
     echo "tagRule is a mandatory parameter!"
-    return false
+    return 1
   }
   if(annotationType == "" ) {
       echo "annotationType is a mandatory parameter!"
-      return false
+      return 1
   }
   if(source == "" ) {
       echo "source is a mandatory parameter!"
-      return false
+      return 1
   }
   if(annotationDescription == "" ) {
       echo "annotationDescription is a mandatory parameter!"
-      return false
+      return 1
   }
 
   String eventType = "CUSTOM_ANNOTATION"
@@ -66,7 +82,7 @@ def pushDynatraceAnnotationEvent( Map args ) {
   return true
 }
 
-def pushDynatraceConfigurationEvent(Map args){
+private boolean pushDynatraceConfigurationEvent(Map args){
     // check input arguments
     String dtTenantUrl = args.containsKey("dtTenantUrl") ? args.dtTenantUrl : "${DT_TENANT_URL}"
     String dtApiToken = args.containsKey("dtApiToken") ? args.dtApiToken : "${DT_API_TOKEN}"
@@ -81,19 +97,19 @@ def pushDynatraceConfigurationEvent(Map args){
     // check minimum required params
     if(tagRule == "" ) {
         echo "tagRule is a mandatory parameter!"
-        return false
+        return 1
     }
     if(description == "" ) {
         echo "description is a mandatory parameter!"
-        return false
+        return 1
     }
     if(source == "" ) {
         echo "source is a mandatory parameter!"
-        return false
+        return 1
     }
     if(configuration == "" ) {
         echo "configuration is a mandatory parameter!"
-        return false
+        return 1
     }
 
     String eventType = "CUSTOM_CONFIGURATION"
@@ -127,7 +143,7 @@ def pushDynatraceConfigurationEvent(Map args){
     return true
 }
 
-def pushDynatraceDeploymentEvent( Map args ) {
+private boolean pushDynatraceDeploymentEvent( Map args ) {
   // check input arguments
   String dtTenantUrl = args.containsKey("dtTenantUrl") ? args.dtTenantUrl : "${DT_TENANT_URL}"
   String dtApiToken = args.containsKey("dtApiToken") ? args.dtApiToken : "${DT_API_TOKEN}"
@@ -147,19 +163,19 @@ def pushDynatraceDeploymentEvent( Map args ) {
   // check minimum required params
   if(tagRule == "" ) {
     echo "tagRule is a mandatory parameter!"
-    return false
+    return 1
   }
   if(deploymentName == "" ) {
       echo "deploymentName is a mandatory parameter!"
-      return false
+      return 1
   }
   if(source == "" ) {
       echo "source is a mandatory parameter!"
-      return false
+      return 1
   }
   if(deploymentVersion == "" ) {
       echo "deploymentVersion is a mandatory parameter!"
-      return false
+      return 1
   }
 
   String eventType = "CUSTOM_DEPLOYMENT"
@@ -172,9 +188,9 @@ def pushDynatraceDeploymentEvent( Map args ) {
     deploymentProject: deploymentProject,
     ciBackLink: ciBackLink,
     remediationAction: remediationAction,
+    customProperties: customProperties,
     tags: tagRule[0].tags,
-    source: source,
-    customProperties: customProperties
+    source: source
   ]
 
   def createEventResponse = httpRequest contentType: 'APPLICATION_JSON', 
@@ -196,7 +212,7 @@ def pushDynatraceDeploymentEvent( Map args ) {
   return true
 }
 
-def pushDynatraceInfoEvent( Map args ) {
+private boolean pushDynatraceInfoEvent( Map args ) {
 
   // check input arguments
   String dtTenantUrl = args.containsKey("dtTenantUrl") ? args.dtTenantUrl : "${DT_TENANT_URL}"
@@ -212,15 +228,15 @@ def pushDynatraceInfoEvent( Map args ) {
   // check minimum required params
   if(tagRule == "" ) {
     echo "tagRule is a mandatory parameter!"
-    return false
+    return 1
   }
   if(source == "" ) {
       echo "source is a mandatory parameter!"
-      return false
+      return 1
   }
   if(description == "" ) {
       echo "description is a mandatory parameter!"
-      return false
+      return 1
   }
 
   String eventType = "CUSTOM_INFO"
